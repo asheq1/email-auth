@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { getAuth } from "firebase/auth";
 import app from "../../auth/firebase.config";
 import { useState } from "react";
@@ -13,10 +13,11 @@ const Register = () => {
 
     const handleRegister = e => {
         e.preventDefault()
+        const name = e.target.name.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
         const termsAccepted = e.target.terms.checked;
-        console.log(email, password, termsAccepted)
+        console.log(name, email, password, termsAccepted)
 
          // reset error
          setRegisterError('')
@@ -41,6 +42,20 @@ const Register = () => {
             .then(result => {
                 console.log(result.user)
                 setSuccess('User created successfully.')
+                
+                // update profile 
+                updateProfile(result.user, {
+                    displayName: name,
+                    photoURL: "https://example.com/jane-q-user/profile.jpg"
+                })
+                .then( () => console.log('Profile updated'))
+                .catch()
+
+                // send verification email
+                sendEmailVerification(result.user)
+                .then(()  => {
+                    alert("Please check your email and verified your account")
+                })
             })
             .catch(error => {
                 console.error(error)
@@ -54,6 +69,9 @@ const Register = () => {
             <div className="mx-auto md:w-1/2">
                 <h2 className="text-3xl mb-8">Register page</h2>
                 <form onSubmit={handleRegister}>
+                    <input className="mb-4 w-full py-2 px-4 border" 
+                            placeholder="Your Name" type="text" name="name" required />
+                    <br />
                     <input className="mb-4 w-full py-2 px-4 border" 
                         placeholder="Email" type="email" name="email" required />
                     <br />
