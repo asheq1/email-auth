@@ -4,6 +4,7 @@ import app from "../../auth/firebase.config";
 import { useState } from "react";
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Register = () => {
     const [registerError, setRegisterError] = useState('');
@@ -80,6 +81,8 @@ const Register = () => {
                 {
                     success && <p className="text-green-500">{success}</p>
                 }
+                    <p>Already have an account? 
+                    <Link to="/login">Please Login</Link></p>
             </div>
         </div>
     );
