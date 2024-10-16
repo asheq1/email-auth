@@ -1,21 +1,49 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getAuth } from "firebase/auth";
 import app from "../../auth/firebase.config";
+import { useState } from "react";
+import { FaEye } from "react-icons/fa";
+import { FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
+    const [registerError, setRegisterError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
     const handleRegister = e => {
         e.preventDefault()
         const email = e.target.email.value;
         const password = e.target.password.value;
-        console.log(email, password)
+        const termsAccepted = e.target.terms.checked;
+        console.log(email, password, termsAccepted)
+
+         // reset error
+         setRegisterError('')
+         setSuccess('')
+
+        // validate 
+        if(password.length < 6) {
+            setRegisterError(' Password should be at least 6 characters')
+            return;
+        } else if(!/[A-Z]/.test(password)){
+            setRegisterError('Password should be at least one upper case')
+            return;
+        } else if(!termsAccepted){
+            setRegisterError('Please Accept our terms & conditions')
+            return;
+        }
+       
+
         // create user 
         const auth = getAuth(app)
         createUserWithEmailAndPassword(auth, email, password)
             .then(result => {
                 console.log(result.user)
+                setSuccess('User created successfully.')
             })
             .catch(error => {
                 console.error(error)
+                setRegisterError(error.message)
             })
 
     }
@@ -25,14 +53,33 @@ const Register = () => {
             <div className="mx-auto md:w-1/2">
                 <h2 className="text-3xl mb-8">Register page</h2>
                 <form onSubmit={handleRegister}>
-                    <input className="mb-4 w-3/4 py-2 px-4" 
-                        placeholder="Email" type="email" name="email"  />
+                    <input className="mb-4 w-full py-2 px-4 border" 
+                        placeholder="Email" type="email" name="email" required />
                     <br />
-                    <input className="mb-4 w-3/4 py-2 px-4" 
-                        placeholder="Password" type="password" name="password" />
+                    <div className="mb-4 relative border">
+                        <input className="w-full py-2 px-4" 
+                            placeholder="Password" 
+                            type={showPassword ? "text" : "password" } 
+                            name="password"
+                            required/>
+                        <span className="absolute top-3 right-2" onClick={ () => setShowPassword(!showPassword)}>{
+                            showPassword ? <FaEyeSlash /> : <FaEye />
+                        }</span>
+                    </div>
                     <br />
-                    <input className="btn btn-secondary mb-4 w-3/4" type="submit" value="Register" />
+                    <div>
+                        <input type="checkbox" name="terms" id="terms" />
+                        <label className="ml-2" htmlFor="terms">Accept our <a href="">terms and conditions</a></label>
+                    </div>
+                    <br />
+                    <input className="btn btn-secondary mb-4 w-full" type="submit" value="Register" />
                 </form>
+                {
+                    registerError && <p className="text-red-400">{registerError}</p>
+                }
+                {
+                    success && <p className="text-green-500">{success}</p>
+                }
             </div>
         </div>
     );
